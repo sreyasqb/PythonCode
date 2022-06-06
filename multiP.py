@@ -15,16 +15,16 @@ the minimum and average on the screen.
 from multiprocessing import Process,Value,Array
 import os
 
-l=[5,2,3,4,6,7,8,9,10]
+# l=[5,2,3,4,6,7,8,9,10]
 
-def min(n):
+def min(n,l):
     print(f'Process 1 id : {os.getpid()}')
     m=l[0]
     for i in l:
         if i<m:m=i
     n.value=m
 
-def avg(n):
+def avg(n,l):
     print(f'Process 2 id : {os.getpid()}')
     s=0
     for i in l:
@@ -33,9 +33,9 @@ def avg(n):
 if __name__ == '__main__':
     _min=Value('i',0)
     _avg=Value('d',0.0)
-    arr=Array('i',range(10))
-    p1=Process(target=min,args=(_min,))
-    p2=Process(target=avg,args=(_avg,))
+    arr=Array('i',[4,5,2,3,6,9,12,20,13,90])
+    p1=Process(target=min,args=(_min,arr))
+    p2=Process(target=avg,args=(_avg,arr))
     p1.start()
     p2.start()
     p1.join()
