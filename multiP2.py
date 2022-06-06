@@ -1,3 +1,32 @@
+'''
+QUESTION
+
+Write a C program to implement the following game.
+ The parent program P first creates two shared memory segments, and then
+spawns two child processes C and D.
+ One of the two shared memory segment is meant for communications
+between P and C, and the other for communications between P and D.
+Now, a loop runs as follows.
+ In each iteration (also called round), P first randomly chooses one of the two
+flags: MIN and MAX (the choice randomly varies from one iteration to
+another).
+ Each of the two child processes C and D generates a random positive integer
+and sends that to P via its shared memory.
+ P reads the two integers; let these be c and d.
+o If P has chosen MIN, then the child who sent the smaller of c and d
+gets one point.
+o If P has chosen MAX, then the sender of the larger of c and d gets one
+point.
+o If c = d, then this round is ignored.
+ The child process who first obtains five points wins the game.
+ During each iteration of the game, P should print appropriate messages (like
+P’s choice of the flag, the integers received from C and D, which child gets
+the point, the current scores of C and D) in order to let the user know how
+the game is going on.
+ C and D exits after five iterations, then the parent process P also exits.
+'''
+
+
 from multiprocessing import Process,Value
 import random
 def C(n):n.value=random.randint(0,100)
