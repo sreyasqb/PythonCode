@@ -1,4 +1,5 @@
 import math
+#
 class IpDatagram:
     def __init__(self,totalLength,headerLen,offset,id):
         self.totalLength = totalLength
