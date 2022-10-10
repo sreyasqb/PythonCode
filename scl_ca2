@@ -1,0 +1,360 @@
+print("SCL codes - CA2")
+
+#Newton's Divided Difference Interpolation
+
+"""
+x = [300, 304, 305, 307]
+y = [2.4771, 2.4829, 2.4843, 2.4871]
+X = 301
+
+n = len(x)
+table = []
+table.append(y)
+
+for i in range(n - 1):
+    values = []
+    for j in range(len(table[i]) - 1):
+        value = (table[i][j + 1] - table[i][j]) / (x[j + 1] - x[j])
+        values.append(value)
+    table.append(values)
+
+Y = 0
+
+for i in range(len(table)):
+    prod = 1
+    for j in range(i):
+        prod *= (X - x[j])
+    Y += prod * table[i][0]
+
+print(Y)
+
+"""
+
+#------------------------------------------------------------------------------------------------
+
+#Cubic Spline Interpolation
+
+"""
+
+from sympy import *
+
+x = [1, 2, 3, 4]
+y = [1, 5, 11, 8]
+X0 = 1.5
+
+h = x[1] - x[0]
+n = len(x) - 1
+X = symbols('X')
+m = symbols('m0:%d' % (n + 1))
+M = {0: 0, n: 0}
+expr = []
+
+for i in range(1, n):
+    expr.append(m[i - 1] + 4 * m[i] + m[i + 1] - 6 * (y[i - 1] - 2 * y[i] + y[i + 1]) / h ** 2)
+    for j in M:
+        expr[i - 1] = expr[i - 1].subs(m[j], M[j])
+
+sol = solve(tuple(expr), tuple(m))
+
+for i in range(len(sol)):
+    M[i + 1] = sol[m[i + 1]]
+
+ind = 0
+for ind in range(n + 1):
+    if X0 <= x[ind]:
+        break
+
+Y = (x[ind] - X0) ** 3 * M[ind - 1] / (6 * h) + (X0 - x[ind - 1]) ** 3 * M[ind] / (6 * h) + (x[ind] - X0) / h * (y[ind - 1] - (h ** 2 * M[ind - 1]) / 6) + (X0 - x[ind - 1]) / h * (y[ind] - h ** 2 * M[ind] / 6)
+print(Y)
+
+"""
+
+#----------------------------------------------------------------------------------------------
+
+#Lagrange's Interpolation
+
+"""
+x = [300, 304, 305, 307]
+y = [2.4771, 2.4829, 2.4843, 2.4871]
+X = 301
+
+Y = 0
+
+for i in range(len(x)):
+    numerator = 1
+    denominator = 1
+    for j in range(len(x)):
+        if j != i:
+            numerator *= (X - x[j])
+            denominator *= (x[i] - x[j])
+    Y += numerator * y[i] / denominator
+
+print(Y)
+
+"""
+
+#--------------------------------------------------------------------------------------------
+
+#Inverse Lagrange's Interpolation
+
+"""
+x = [168, 120, 72, 63]
+y = [3, 7, 9, 10]
+X = 6
+
+Y = 0
+
+for i in range(len(y)):
+    numerator = 1
+    denominator = 1
+    for j in range(len(y)):
+        if j != i:
+            numerator *= (X - y[j])
+            denominator *= (y[i] - y[j])
+    Y += numerator * x[i] / denominator
+
+print(Y)
+
+"""
+
+#-----------------------------------------------------------------------------------------------
+
+#Newton's Forward Difference Interpolation
+
+"""
+
+def fact(n):
+    factorial = 1
+    for i in range(1, n + 1):
+        factorial *= i
+    return factorial
+    
+x = [1891, 1901, 1911, 1921, 1931]
+y = [46, 66, 81, 93, 101]
+X = 1895
+
+h = x[1] - x[0]
+p = (X - x[0]) / h
+
+table = []
+table.append(y)
+for i in range(len(x) - 1):
+    column = []
+    for j in range(1, len(table[i])):
+        column.append(table[i][j] - table[i][j - 1])
+    table.append(column)
+
+Y = 0
+
+for i in range(len(table)):
+    prod = 1
+    for j in range(i):
+        prod *= (p - j)
+    Y += prod * table[i][0] / fact(i)
+
+print(Y)
+
+
+"""
+
+#------------------------------------------------------------------------------------
+
+#Newton's Backward Difference Interpolation
+
+"""
+
+def fact(n):
+    factorial = 1
+    for i in range(1, n + 1):
+        factorial *= i
+    return factorial
+    
+x = [1891, 1901, 1911, 1921, 1931]
+y = [46, 66, 81, 93, 101]
+X = 1925
+
+h = x[1] - x[0]
+p = (X - x[len(x) - 1]) / h
+
+table = []
+table.append(y)
+for i in range(len(x) - 1):
+    column = []
+    for j in range(1, len(table[i])):
+        column.append(table[i][j] - table[i][j - 1])
+    table.append(column)
+
+Y = 0
+
+for i in range(len(table)):
+    prod = 1
+    for j in range(i):
+        prod *= (p + j)
+    Y += prod * table[i][-1] / fact(i)
+
+print(Y)
+
+"""
+
+#-----------------------------------------------------------------------------------------------
+
+#Newton's Forward Difference Differentiation
+
+"""
+x = [0.0, 0.1, 0.2, 0.3, 0.4]
+y = [1.0000, 0.9975, 0.9900, 0.9776, 0.8604]
+X = 0
+
+h = x[1] - x[0]
+p = (X - x[0]) / h
+
+table = []
+table.append(y)
+for i in range(len(x) - 1):
+    column = []
+    for j in range(1, len(table[i])):
+        column.append(table[i][j] - table[i][j - 1])
+    table.append(column)
+
+Y = 0
+t = symbols('t')
+
+for i in range(len(table)):
+    temp = table[i][0]
+    for j in range(i):
+        temp *= (t - j)
+    temp /= fact(i)
+    Y += temp
+
+dydx = diff(Y, t).subs(t, p) / h
+dy2dx2 = diff(diff(Y, t), t).subs(t, p) / h ** 2
+
+print(dydx)
+print(dy2dx2)
+
+"""
+
+#----------------------------------------------------------------------------------------------
+
+#Newton's Backward Difference Differentiation
+
+"""
+x = [0.0, 0.1, 0.2, 0.3, 0.4]
+y = [1.0000, 0.9975, 0.9900, 0.9776, 0.8604]
+X = 0
+
+h = x[1] - x[0]
+p = (X - x[-1]) / h
+
+table = []
+table.append(y)
+for i in range(len(x) - 1):
+    column = []
+    for j in range(1, len(table[i])):
+        column.append(table[i][j] - table[i][j - 1])
+    table.append(column)
+
+Y = 0
+t = symbols('t')
+
+for i in range(len(table)):
+    temp = table[i][-1]
+    for j in range(i):
+        temp *= (t + j)
+    temp /= fact(i)
+    Y += temp
+
+dydx = diff(Y, t).subs(t, p) / h
+dy2dx2 = diff(diff(Y, t), t).subs(t, p) / h ** 2
+
+print(dydx)
+print(dy2dx2)
+
+"""
+
+#------------------------------------------------------------------------------------------------
+
+
+#Trapezoidal Rule
+
+"""
+from sympy import *
+x = symbols('x')
+
+eq = log(x)
+limits = [4, 5.2]
+
+h = 0.1
+X = []
+Y = []
+ind = limits[0]
+
+while ind <= limits[1]:
+    X.append(ind)
+    Y.append(eq.subs(x, ind))
+    ind += h
+
+value = (h / 2) * (Y[0] + 2 * sum(Y[1:-1]) + Y[-1])
+
+print(N(value))
+
+
+"""
+
+#---------------------------------------------------------------------------------------------
+
+#Simpson's 1/3 Rule
+
+"""
+eq = log(x)
+limits = [4, 5.2]
+
+h = 0.1
+X = []
+Y = []
+ind = limits[0]
+
+while ind <= limits[1]:
+    X.append(ind)
+    Y.append(eq.subs(x, ind))
+    ind += h
+
+value = (h / 3) * (Y[0] + 4 * sum(Y[1:-1:2]) + 2 * sum(Y[2:-1:2]) + Y[-1])
+
+print(N(value))
+
+"""
+
+
+#----------------------------------------------------------------------------------------------
+
+#Simpson's 3/8 Rule
+
+"""
+eq = log(x)
+limits = [4, 5.2]
+
+h = 0.1
+X = []
+Y = []
+ind = limits[0]
+
+while ind <= limits[1]:
+    X.append(ind)
+    Y.append(eq.subs(x, ind))
+    ind += h
+
+total = 0
+total3 = 0
+for i in range(1, len(Y) - 1):
+    if i % 3 != 0:
+        total += Y[i]
+    else:
+        total3 += Y[i]
+
+
+value = (3 * h / 8) * (Y[0] + 2 * total3 + 3 * total + Y[-1])
+
+print(N(value))
+
+"""
