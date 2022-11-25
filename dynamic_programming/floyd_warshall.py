@@ -6,6 +6,11 @@ def floydWarshall(A):
                 A[i][j] = min(A[i][j], A[i][k] + A[k][j])
     return A
 
+    
+
+
+
+
 INF=float('inf')
 graph = [[0, 5, INF, 10],
          [INF, 0, 3, INF],
@@ -15,4 +20,9 @@ graph = [[0, 5, INF, 10],
 APSP=floydWarshall(graph)
 for i in APSP:
     print(*i,sep='\t')
+
+
+
+
+
 
