@@ -1,5 +1,5 @@
 import pygame as pg
-
+from settings import *
 _ = False
 
 mini_map = [
@@ -55,9 +55,8 @@ class Map:
         #         print(i,value)
         #         if value:
         #             self.world_map[(i,j)] = value
-        print(self.world_map)
     
     def draw(self):
 
         for pos in self.world_map:
-            pg.draw.rect(self.game.screen,'darkgray',(pos[0]*80,pos[1]*80,80,80),2)
+            pg.draw.rect(self.game.screen,'darkgray',(pos[0]*TILE_WIDTH,pos[1]*TILE_WIDTH,TILE_WIDTH,TILE_WIDTH),2)
