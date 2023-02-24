@@ -55,8 +55,10 @@ class Player:
             self.y += dy
 
     def draw(self):
+        
         size = TILE_WIDTH
-        pg.draw.line(self.game.screen, 'yellow',(self.x*size,self.y*size),(self.x*size + HEIGHT*math.cos(self.angle),self.y * size + HEIGHT * math.sin(self.angle)),2)
+        
+        #pg.draw.line(self.game.screen, 'yellow',(self.x*size,self.y*size),(self.x*size + HEIGHT*math.cos(self.angle),self.y * size + HEIGHT * math.sin(self.angle)),2)
         pg.draw.circle(self.game.screen,'green',(self.x * size,self.y * size),15)
 
     def update(self):
