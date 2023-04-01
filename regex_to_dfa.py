@@ -24,7 +24,10 @@ class Node:
     
 
 #s = 'a.(b+c)*#'
-s = '(a+b)*.a.b.b'
+# s = '(a+b)*.a.b.b'
+s = 'a.(a+b)*.b.b'
+
+
 
 def priority(c):
     if c=='*':return 2
@@ -33,14 +36,14 @@ def priority(c):
     return -1
 
 isTerminal = lambda x:True if ord('a')<=ord(x)<=ord('z') else False
-
+terminals = set()
 def postfix(s):
     ans = ''
     l = []
-    
     for i in range(len(s)):
         if isTerminal(s[i]):
             ans+=s[i]
+            terminals.add(s[i])
         elif len(l)==0 or s[i]=='(':
             l.append(s[i])
         elif s[i]==')':
@@ -55,6 +58,7 @@ def postfix(s):
         ans+=l.pop()
     return ans
 
+print(postfix(s))
 
 def constructParseTree(s):
     s = postfix(s)
@@ -65,29 +69,31 @@ def constructParseTree(s):
 
     while i<len(s):
         if isTerminal(s[i]):
-            terminal = Node(Operator.TERMINAL,f'{s[i]}{terminalCount}')
+            terminal = Node(Operator.TERMINAL,(terminalCount,s[i]))
             stack.append(terminal)
             terminalCount+=1
         elif s[i] in '+':
-            operator = Node(Operator.OR ,f'{s[i]}{orCount}',left = stack[-2],right = stack[-1])
+            operator = Node(Operator.OR ,(orCount,s[i]),left = stack[-2],right = stack[-1])
             stack.pop()
             stack.pop()
             stack.append(operator)
             orCount+=1
         elif s[i] == '.':
-            operator = Node(Operator.CONCATINATION,f'{s[i]}{concatCount}',left = stack[-2],right = stack[-1])
+            operator = Node(Operator.CONCATINATION,(concatCount,s[i]),left = stack[-2],right = stack[-1])
+            # operator = Node(Operator.CONCATINATION,f'{s[i]}{concatCount}',left = stack[-2],right = stack[-1])
             stack.pop()
             stack.pop()
             stack.append(operator)
             concatCount+=1
         elif s[i]=='*':
-            operator = Node(Operator.CLOSURE,f'{s[i]}{closureCount}',left = stack[-1])
+            operator = Node(Operator.CLOSURE,(closureCount,s[i]),left = stack[-1])
+            # operator = Node(Operator.CLOSURE,f'{s[i]}{closureCount}',left = stack[-1])
             stack[-1] = operator
             closureCount+=1
         #print(stack)
         i+=1
     root = stack[0]
-    rightHash = Node(Operator.TERMINAL,f'#{terminalCount}')
+    rightHash = Node(Operator.TERMINAL,(terminalCount,'#'))
     tempRoot = Node(Operator.CONCATINATION,f'.{concatCount}',left=root,right=rightHash)
     return tempRoot
     # print(root.left,root.right)
@@ -95,14 +101,20 @@ def constructParseTree(s):
 
 root = constructParseTree(s)
 
-
+follow = {}
 def dfs(root):
+    global initialState
     if not root:return
-
     firstVals = list(map(lambda x:x.val,root.first))
     lastVals = list(map(lambda x:x.val,root.last))
-    followVals = list(map(lambda x:x.val,root.follow))
+    followVals = list(map(lambda x:x.val[0],root.follow))
     print(root.val,root.nullable,firstVals,lastVals,followVals,sep = '\t')
+    if root.type == Operator.TERMINAL:
+        # head = root.val.rstrip('0123456789')
+        # tail = root.val[len(head):]
+        follow[root.val] = set(followVals)
+    
+        
     dfs(root.left)
     dfs(root.right)
 
@@ -155,13 +167,49 @@ def dfsFollow(root):
             node.follow = node.follow | root.right.first
 
 
-
-
 dfsFirst(root)      
 dfsLast(root)
 dfsFollow(root)
 print('Symbol','Nullable','First','Last','Follow',sep = '\t')
 dfs(root)
+# print(follow)
+
+initalState = tuple(sorted((map(lambda x:x.val[0],root.first))))
+# print(initalState)
+
+dfa = {initalState:{}}
+queue = [initalState]
+
+
+# print(terminals)
+
+def constructDfa():
+    while len(queue)!=0:
+        # print('queue : ',queue)
+        newState = {queue[0]:{k:set() for k in terminals}}
+        for state in queue[0]:
+            for i in follow:
+                if state == i[0] and i[1]!='#':
+                    newState[queue[0]][i[1]] |= follow[i]
+        for x in newState[queue[0]].values():
+            if tuple(x) not in dfa:
+                queue.append(tuple(x))
+                dfa[tuple(x)] = {}
+        # print('queue ',queue)
+        # print(newState)
+        
+        dfa[queue[0]] = newState[queue[0]]
+        queue.pop(0)
+        # print('updated queue : ',queue)
+    # print('dfa : ',dfa)
+
+constructDfa()
+print('\ndfa is : \n')
+print(dfa)
+
+
+
+
 #print(root.left,root.right,sep = ' <---> ')
 # print(root.left.left.right)
 
