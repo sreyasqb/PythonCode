@@ -27,7 +27,7 @@ class Node:
 # s = '(a+b)*.a.b.b'
 s = 'a.(a+b)*.b.b'
 
-
+#
 
 def priority(c):
     if c=='*':return 2
