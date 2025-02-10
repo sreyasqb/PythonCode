@@ -57,11 +57,10 @@ setup_java_symlink() {
 
 # List of tools to check and install
 tools=(
-  "Homebrew:command -v brew:/bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
   "OpenJDK 17:brew list --formula | grep -q 'openjdk@17':brew install openjdk@17"
   "golangci-lint:brew list --formula | grep -q 'golangci-lint':brew install golangci-lint"
   "diffutils:brew list --formula | grep -q 'diffutils':brew install diffutils"
-  "Rust:command -v rustc:curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
+  "Rust:command -v rustc:curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && source \"$HOME/.cargo/env\""
   "cmake:brew list --formula | grep -q 'cmake':brew install cmake"
   "Python 3:command -v python3:brew install python3"
   "semgrep:brew list --formula | grep -q 'semgrep':brew install semgrep"
@@ -73,7 +72,31 @@ tools=(
 
 echo -e "${CYAN}Checking installation status for the following tools and software:${NC}\n"
 
-# Loop through each tool and check installation
+# Install Homebrew first
+if ! command -v brew &>/dev/null; then
+    echo -e "${RED}${CROSS_MARK} Homebrew is not installed. Installing now...${NC}"
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    
+    # Add Homebrew to PATH immediately after installation
+    if [[ -f "/opt/homebrew/bin/brew" ]]; then
+        echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> "$HOME/.zprofile"
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+    elif [[ -f "/usr/local/bin/brew" ]]; then
+        echo 'eval "$(/usr/local/bin/brew shellenv)"' >> "$HOME/.zprofile"
+        eval "$(/usr/local/bin/brew shellenv)"
+    fi
+    
+    # Verify Homebrew is now available
+    if ! command -v brew &>/dev/null; then
+        echo -e "${RED}${CROSS_MARK} Homebrew installation failed.${NC}"
+        exit 1
+    fi
+    echo -e "${GREEN}${CHECK_MARK} Homebrew installed and added to PATH successfully.${NC}"
+else
+    echo -e "${GREEN}${CHECK_MARK} Homebrew is already installed.${NC}"
+fi
+
+# Loop through each remaining tool and check installation
 for tool in "${tools[@]}"; do
   IFS=":" read -r name check_command install_command <<< "$tool"
   install_tool "$name" "$check_command" "$install_command"
